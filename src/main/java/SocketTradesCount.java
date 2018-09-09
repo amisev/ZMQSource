@@ -43,13 +43,10 @@ public class SocketTradesCount {
         // deserialization schema
         ZMQSourceSchema schema = new ZMQSourceSchema();
         // zmq source
-        ZMQSource source = new ZMQSource(config, "trades", schema);
+        ZMQSource<Trade> source = new ZMQSource<>(config, "trades", schema);
 
-        DataStream<Byte[]> trades = env.addSource(source);
+        DataStream<Trade> trades = env.addSource(source);
 
-        env.execute("Socket Window WordCount");
-
-        /*
         // parse the data, group it, window it, and aggregate the counts
         DataStream<Double> aggVolumes = trades
                 .timeWindowAll(Time.seconds(10))
@@ -57,13 +54,12 @@ public class SocketTradesCount {
 
         // print the results with a single thread, rather than in parallel
         aggVolumes.print().setParallelism(1);
-        */
 
-        // env.execute("Socket Window WordCount");
+        env.execute("Socket Window WordCount");
     }
-    private static class SummingAggregator implements AggregateFunction<TradeOuterClass.Trade, Double, Double> {
+    private static class SummingAggregator implements AggregateFunction<Trade, Double, Double> {
 
-        public Double add(TradeOuterClass.Trade trade, Double aDouble) {
+        public Double add(Trade trade, Double aDouble) {
             return aDouble + trade.getQty();
         }
 

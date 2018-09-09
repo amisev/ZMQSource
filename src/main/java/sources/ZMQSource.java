@@ -10,6 +10,8 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.source.MultipleIdsMessageAcknowledgingSourceBase;
 
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
+import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
+import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.operators.StreamingRuntimeContext;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Context;
@@ -27,7 +29,7 @@ import java.util.List;
  * @param <OUT> the type of the data read from ZeroMQ
  */
 // UID, Session ID
-public class ZMQSource<OUT> extends MultipleIdsMessageAcknowledgingSourceBase<OUT, String, Long>
+public class ZMQSource<OUT> extends RichSourceFunction<OUT>
             implements ResultTypeQueryable<OUT> {
 
     private static final long serialVersionUID = -2350020389889300830L;
@@ -57,7 +59,6 @@ public class ZMQSource<OUT> extends MultipleIdsMessageAcknowledgingSourceBase<OU
 
 	public ZMQSource(ZMQConnectionConfig zmqConnectionConfig, String queueName,
 						DeserializationSchema<OUT> deserializationSchema) {
-		super(String.class);
 		this.zmqConnectionConfig = zmqConnectionConfig;
 		this.queueName = queueName;
 		this.schema = deserializationSchema;
@@ -65,9 +66,7 @@ public class ZMQSource<OUT> extends MultipleIdsMessageAcknowledgingSourceBase<OU
 
 	@Override
 	public void open(Configuration config) throws Exception {
-	    System.out.println("Open invoked 1");
 		super.open(config);
-        System.out.println("Open invoked 2");
 
 		//  Prepare our context and sockets
 		context = ZMQ.context(1);
@@ -105,17 +104,24 @@ public class ZMQSource<OUT> extends MultipleIdsMessageAcknowledgingSourceBase<OU
         }
     }
 
+    /*
+    @Override
 	public void run(SourceContext<OUT> ctx) throws Exception {
-		while (running) {
-			OUT result = schema.deserialize(frontend.recv());
-			if (schema.isEndOfStream(result)) {
-			    break;
-            }
-			ctx.collect(result);
-		}
 	}
+	*/
 
-	public void cancel() {
+    @Override
+    public void run(SourceContext<OUT> sourceContext) throws Exception {
+        while (running) {
+            OUT result = schema.deserialize(frontend.recv());
+            if (schema.isEndOfStream(result)) {
+                break;
+            }
+            sourceContext.collect(result);
+        }
+    }
+
+    public void cancel() {
 		//TODO Complete cancel
 		running = false;
 	}
@@ -124,6 +130,7 @@ public class ZMQSource<OUT> extends MultipleIdsMessageAcknowledgingSourceBase<OU
 		return schema.getProducedType();
 	}
 
+	/*
 	@Override
 	protected void acknowledgeSessionIDs(List<Long> sessionIds) {
 		//TODO Acknowledge msgs
@@ -134,6 +141,7 @@ public class ZMQSource<OUT> extends MultipleIdsMessageAcknowledgingSourceBase<OU
 			channel.txCommit();
 		} catch (IOException e) {
 			throw new RuntimeException("Messages could not be acknowledged during checkpoint creation.", e);
-		}*/
+		}
 	}
+	*/
 }

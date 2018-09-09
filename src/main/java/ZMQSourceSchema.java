@@ -4,9 +4,6 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 
 import java.io.IOException;
 
-import sources.TradeOuterClass;
-import sources.TradeOuterClass.Trade;
-
 public class ZMQSourceSchema implements DeserializationSchema<Trade>, SerializationSchema<Trade> {
 
     private static final long serialVersionUID = 444L;
