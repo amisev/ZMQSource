@@ -1,13 +1,12 @@
 SocketTradesCount.class
+SocketTradesCount$SummingAggregator.class
+Trade.class
 sources\TradeOuterClass$Trade.class
 ZMQSourceSchema.class
 sources\TradeOuterClass.class
 sources\TradeOuterClass$Trade$1.class
-sources\TradeOuterClass$Trade$Builder.class
-SocketTradesCount$1.class
-sources\ZMQSource.class
-SocketTradesCount$SummingAggregator.class
-Trade.class
 sources\TradeOuterClass$TradeOrBuilder.class
 sources\TradeOuterClass$1.class
+sources\TradeOuterClass$Trade$Builder.class
 sources\ZMQConnectionConfig.class
+sources\ZMQSource.class

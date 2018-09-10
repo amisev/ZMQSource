@@ -2,6 +2,7 @@ import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -34,6 +35,7 @@ public class SocketTradesCount {
 
         // get the execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
         // get input data by connecting to the socket
         // DataStream<String> text = env.socketTextStream(hostname, port, "\n");
@@ -45,17 +47,21 @@ public class SocketTradesCount {
         // zmq source
         ZMQSource<Trade> source = new ZMQSource<>(config, "trades", schema);
 
-        DataStream<Trade> trades = env.addSource(source);
+        DataStream<Trade> trades = env.addSource(source).setParallelism(1);
 
-        // parse the data, group it, window it, and aggregate the counts
-        DataStream<Double> aggVolumes = trades
-                .timeWindowAll(Time.seconds(10))
-                .aggregate(new SummingAggregator());
+        DataStream<Double> volumes = trades
+                .map(trade -> {
+                    double volume = trade.getQty();
+                    return volume;
+                })
+                .timeWindowAll(Time.seconds(5))
+                .sum(0);
 
-        // print the results with a single thread, rather than in parallel
-        aggVolumes.print().setParallelism(1);
+        volumes.print();
 
         env.execute("Socket Window WordCount");
+
+        System.out.println("5");
     }
     private static class SummingAggregator implements AggregateFunction<Trade, Double, Double> {
 

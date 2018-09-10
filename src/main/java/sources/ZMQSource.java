@@ -29,8 +29,7 @@ import java.util.List;
  * @param <OUT> the type of the data read from ZeroMQ
  */
 // UID, Session ID
-public class ZMQSource<OUT> extends RichSourceFunction<OUT>
-            implements ResultTypeQueryable<OUT> {
+public class ZMQSource<OUT> implements SourceFunction<OUT>, ResultTypeQueryable<OUT> {
 
     private static final long serialVersionUID = -2350020389889300830L;
 
@@ -62,11 +61,18 @@ public class ZMQSource<OUT> extends RichSourceFunction<OUT>
 		this.zmqConnectionConfig = zmqConnectionConfig;
 		this.queueName = queueName;
 		this.schema = deserializationSchema;
+
+		context = ZMQ.context(1);
+		frontend = context.socket(ZMQ.PULL);
+		frontend.connect(zmqConnectionConfig.getUri());
 	}
 
+	/*
 	@Override
 	public void open(Configuration config) throws Exception {
 		super.open(config);
+
+		System.out.println("open called");
 
 		//  Prepare our context and sockets
 		context = ZMQ.context(1);
@@ -91,7 +97,9 @@ public class ZMQSource<OUT> extends RichSourceFunction<OUT>
 		running = true;
 	}
 
-	@Override
+	*/
+
+	/*
     public void close() throws Exception {
 	    super.close();
 	    try {
@@ -104,6 +112,7 @@ public class ZMQSource<OUT> extends RichSourceFunction<OUT>
         }
     }
 
+    */
     /*
     @Override
 	public void run(SourceContext<OUT> ctx) throws Exception {
@@ -114,9 +123,12 @@ public class ZMQSource<OUT> extends RichSourceFunction<OUT>
     public void run(SourceContext<OUT> sourceContext) throws Exception {
         while (running) {
             OUT result = schema.deserialize(frontend.recv());
+            // System.out.println("m");
+            /*
             if (schema.isEndOfStream(result)) {
                 break;
             }
+            */
             sourceContext.collect(result);
         }
     }
