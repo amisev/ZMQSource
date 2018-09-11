@@ -29,7 +29,8 @@ import java.util.List;
  * @param <OUT> the type of the data read from ZeroMQ
  */
 // UID, Session ID
-public class ZMQSource<OUT> implements SourceFunction<OUT>, ResultTypeQueryable<OUT> {
+public class ZMQSource<OUT> extends RichSourceFunction<OUT>
+        implements ResultTypeQueryable<OUT> {
 
     private static final long serialVersionUID = -2350020389889300830L;
 
@@ -62,27 +63,23 @@ public class ZMQSource<OUT> implements SourceFunction<OUT>, ResultTypeQueryable<
 		this.queueName = queueName;
 		this.schema = deserializationSchema;
 
-		context = ZMQ.context(1);
-		frontend = context.socket(ZMQ.PULL);
-		frontend.connect(zmqConnectionConfig.getUri());
+		// this.context = ZMQ.context(1);
+		// this.frontend = context.socket(ZMQ.PULL);
+		// this.frontend.connect(zmqConnectionConfig.getUri());
 	}
 
-	/*
 	@Override
 	public void open(Configuration config) throws Exception {
 		super.open(config);
 
-		System.out.println("open called");
-
 		//  Prepare our context and sockets
-		context = ZMQ.context(1);
-
+		this.context = ZMQ.context(1);
 		//  Socket facing clients
-		frontend = context.socket(ZMQ.PULL);
+		this.frontend = context.socket(ZMQ.PULL);
 		// frontend = context.socket(ZMQ.SUB);
+		this.frontend.connect(zmqConnectionConfig.getUri());
 
-		frontend.connect(zmqConnectionConfig.getUri());
-
+		/*
 		RuntimeContext runtimeContext = getRuntimeContext();
 		if (runtimeContext instanceof StreamingRuntimeContext
 				&& ((StreamingRuntimeContext) runtimeContext).isCheckpointingEnabled()) {
@@ -91,20 +88,18 @@ public class ZMQSource<OUT> implements SourceFunction<OUT>, ResultTypeQueryable<
 		} else {
 			autoAck = true;
 		}
+		*/
 
 		LOG.debug("Starting ZeroMQ source with autoAck status: " + autoAck);
 		LOG.debug("Starting ZeroMQ source with uri: " + zmqConnectionConfig.getUri());
 		running = true;
 	}
 
-	*/
-
-	/*
     public void close() throws Exception {
 	    super.close();
 	    try {
-	        if (context != null) {
-	            context.close();
+	        if (this.context != null) {
+	            this.context.close();
             }
         } catch (Exception e) {
 	        throw new RuntimeException("Error while closing RMQ connection with " + queueName
@@ -112,29 +107,19 @@ public class ZMQSource<OUT> implements SourceFunction<OUT>, ResultTypeQueryable<
         }
     }
 
-    */
-    /*
-    @Override
-	public void run(SourceContext<OUT> ctx) throws Exception {
-	}
-	*/
-
     @Override
     public void run(SourceContext<OUT> sourceContext) throws Exception {
         while (running) {
             OUT result = schema.deserialize(frontend.recv());
-            // System.out.println("m");
-            /*
+
             if (schema.isEndOfStream(result)) {
                 break;
             }
-            */
             sourceContext.collect(result);
         }
     }
 
     public void cancel() {
-		//TODO Complete cancel
 		running = false;
 	}
 

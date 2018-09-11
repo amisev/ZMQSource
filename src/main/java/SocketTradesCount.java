@@ -49,6 +49,7 @@ public class SocketTradesCount {
 
         DataStream<Trade> trades = env.addSource(source).setParallelism(1);
 
+        /*
         DataStream<Double> volumes = trades
                 .map(trade -> {
                     double volume = trade.getQty();
@@ -56,12 +57,11 @@ public class SocketTradesCount {
                 })
                 .timeWindowAll(Time.seconds(5))
                 .sum(0);
+        */
 
-        volumes.print();
+        trades.print();
 
-        env.execute("Socket Window WordCount");
-
-        System.out.println("5");
+        env.execute("Trades agg volumes");
     }
     private static class SummingAggregator implements AggregateFunction<Trade, Double, Double> {
 

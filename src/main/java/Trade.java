@@ -35,7 +35,7 @@ public class Trade {
         return ingestionTime;
     }
 
-    public void setTradeId(int tradeId) {
+    public void setTradeId(long tradeId) {
         this.tradeId = tradeId;
     }
 
