@@ -50,22 +50,11 @@ public class ZMQSource<OUT> extends RichSourceFunction<OUT>
 
 	private transient volatile boolean running;
 
-	/*
-	public ZMQSource(ZMQConnectionConfig zmqConnectionConfig, String queueName,
-					DeserializationSchema<OUT> deserializationSchema) {
-		this(zmqConnectionConfig, queueName, deserializationSchema);
-	}
-	*/
-
 	public ZMQSource(ZMQConnectionConfig zmqConnectionConfig, String queueName,
 						DeserializationSchema<OUT> deserializationSchema) {
 		this.zmqConnectionConfig = zmqConnectionConfig;
 		this.queueName = queueName;
 		this.schema = deserializationSchema;
-
-		// this.context = ZMQ.context(1);
-		// this.frontend = context.socket(ZMQ.PULL);
-		// this.frontend.connect(zmqConnectionConfig.getUri());
 	}
 
 	@Override
