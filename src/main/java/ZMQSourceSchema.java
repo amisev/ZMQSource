@@ -1,8 +1,6 @@
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.java.tuple.Tuple5;
-import scala.Tuple6;
 import sources.TradeOuterClass;
 
 import java.io.IOException;

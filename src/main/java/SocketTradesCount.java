@@ -1,15 +1,11 @@
 import org.apache.flink.api.common.functions.AggregateFunction;
-import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.util.Collector;
 
-import sources.TradeOuterClass;
 import sources.ZMQConnectionConfig;
 import sources.ZMQSource;
 
@@ -37,10 +33,6 @@ public class SocketTradesCount {
         // get the execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-
-        // get input data by connecting to the socket
-        // DataStream<String> text = env.socketTextStream(hostname, port, "\n");
-
         // zmq config
         ZMQConnectionConfig config = new ZMQConnectionConfig("127.0.0.1", 5559);
         // deserialization schema

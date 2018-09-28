@@ -1,38 +1,25 @@
 package sources;
 
-import netscape.javascript.JSObject;
-import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
-import org.apache.flink.streaming.api.functions.source.MultipleIdsMessageAcknowledgingSourceBase;
-
-import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.api.operators.StreamingRuntimeContext;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Context;
 import org.zeromq.ZMQ.Socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.util.parsing.json.JSONObject;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * ZeroMQ source (consumer) which reads from a queue
  * @param <OUT> the type of the data read from ZeroMQ
  */
-// UID, Session ID
 public class ZMQSource<OUT> extends RichSourceFunction<OUT>
         implements ResultTypeQueryable<OUT> {
 
-    private static final long serialVersionUID = -2350020389889300830L;
+    private static final long serialVersionUID = -2L;
 
     private static final Logger LOG = LoggerFactory.getLogger(ZMQSource.class);
 
@@ -41,7 +28,6 @@ public class ZMQSource<OUT> extends RichSourceFunction<OUT>
      */
     private final ZMQConnectionConfig zmqConnectionConfig;
 	private final String queueName;
-	// private final boolean usesCorrelationId;
 	protected DeserializationSchema<OUT> schema;
 
 	protected transient boolean autoAck;
@@ -67,17 +53,6 @@ public class ZMQSource<OUT> extends RichSourceFunction<OUT>
 		this.frontend = context.socket(ZMQ.PULL);
 		// frontend = context.socket(ZMQ.SUB);
 		this.frontend.connect(zmqConnectionConfig.getUri());
-
-		/*
-		RuntimeContext runtimeContext = getRuntimeContext();
-		if (runtimeContext instanceof StreamingRuntimeContext
-				&& ((StreamingRuntimeContext) runtimeContext).isCheckpointingEnabled()) {
-			autoAck = false;
-			// enables transaction mode
-		} else {
-			autoAck = true;
-		}
-		*/
 
 		LOG.debug("Starting ZeroMQ source with autoAck status: " + autoAck);
 		LOG.debug("Starting ZeroMQ source with uri: " + zmqConnectionConfig.getUri());
@@ -115,19 +90,4 @@ public class ZMQSource<OUT> extends RichSourceFunction<OUT>
 	public TypeInformation<OUT> getProducedType() {
 		return schema.getProducedType();
 	}
-
-	/*
-	@Override
-	protected void acknowledgeSessionIDs(List<Long> sessionIds) {
-		//TODO Acknowledge msgs
-		/*try {
-			for (long id : sessionIds) {
-				channel.basicAck(id, false);
-			}
-			channel.txCommit();
-		} catch (IOException e) {
-			throw new RuntimeException("Messages could not be acknowledged during checkpoint creation.", e);
-		}
-	}
-	*/
 }
